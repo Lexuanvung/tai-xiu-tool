@@ -1,58 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Tool Tài Xỉu - Final (External JS)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #aaa;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-      border-radius: 1px;
-    }
-    .row { display: flex; gap: 10px; }
-    .row button { flex: 1; }
-    .box {
-      margin-top: 10px;
-      background: #eef;
-      padding: 10px;
-      border-radius: 6px;
-      white-space: pre-line;
-    }
-  </style>
+  <title>Tài Xỉu Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>🎯 Tool Tài Xỉu - FINAL (JS ngoài)</h2>
-    <input type="text" id="sessionName" placeholder="Tên phiên (VD: Phiên 01)">
-    <input type="number" id="capitalInput" placeholder="Vốn khởi đầu (VND)">
-    <input type="number" id="betInput" placeholder="Tiền cược mỗi ván (VND)">
-    
-    <div class="row">
-      <button onclick="addResult('Tài')">+ Tài</button>
-      <button onclick="addResult('Xỉu')">+ Xỉu</button>
+  <div class="toolbar toolbar-left">
+    <button class="btn tai" onclick="addResult('Tài')">✅ Nhập Tài</button>
+    <button class="btn xiu" onclick="addResult('Xỉu')">❌ Nhập Xỉu</button>
+    <button class="btn gray" onclick="deleteLast()">🔁 Undo</button>
+    <button class="btn gray" onclick="editResult()">✏️ Edit</button>
+    <button class="btn gray" onclick="resetSession()">🔄 Reset</button>
+    <button class="btn gray" onclick="saveSession()">💾 Save</button>
+    <button class="btn gray" onclick="loadSession()">📂 Load</button>
+  </div>
+
+  <div class="main-layout">
+    <!-- Cột trái -->
+    <div class="left-panel">
+      <div class="input-row">
+        <button class="btn bet" onclick="placeBet()">🎯 Cược theo dự đoán</button>
+        <input type="text" id="sessionName" placeholder="Tên phiên cược" />
+        <input type="number" id="initialCapital" placeholder="Số vốn (VND)" />
+        <input type="number" id="betAmount" placeholder="Tiền cược / ván" />
+      </div>
+
+      <div class="info-box full-width">🧾 <strong>Lịch sử:</strong>
+        <div id="historyDisplay"></div>
+      </div>
+
+      <div class="info-box">📈 <strong>Chiến lược:</strong>
+        <div id="strategyDisplay"></div>
+      </div>
+
+      <div class="info-box">💰 <strong>Vốn:</strong>
+        <div id="capitalDisplay"></div>
+      </div>
+
+      <div class="info-box">📊 <strong>Lãi/Lỗ:</strong>
+        <div id="profitDisplay"></div>
+      </div>
+
+      <div class="info-box">📅 <strong>Phiên:</strong>
+        <div id="sessionInfoDisplay"></div>
+      </div>
     </div>
-
-    <button onclick="predict()">📌 Dự đoán theo chiến lược</button>
-    <button onclick="resetSession()">🔄 Reset phiên</button>
-    <button onclick="exportExcel()">📤 Xuất Excel</button>
-
-    <div class="box" id="output"></div>
-    <div class="box" id="summary"></div>
-    <div class="box" id="history"></div>
   </div>
 
   <script src="main.js"></script>

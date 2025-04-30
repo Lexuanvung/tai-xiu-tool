@@ -1,125 +1,123 @@
+let history = [];
+let betHistory = [];
+let capital = 0;
+let profit = 0;
+let betLimit = 15;
+let lastPrediction = null;
+let currentBet = null;
 
-let history = [], prediction = null, capital = 0, profit = 0, count = 0, allSessions = [];
+function updateDisplay() {
+  // Hiển thị lịch sử
+  document.getElementById("historyDisplay").textContent = history.join(", ") || "Chưa có dữ liệu";
 
-function addResult(res) {
-  if (!capital) {
-    capital = parseFloat(document.getElementById("capitalInput").value || 0);
+  // Tính chiến lược
+  let strategyOutput = "";
+  let last3 = history.slice(-3);
+  let last10 = history.slice(-10);
+  let count = arr => arr.reduce((acc, v) => { acc[v] = (acc[v] || 0) + 1; return acc; }, {});
+  let c10 = count(last10);
+  let t = c10["Tài"] || 0;
+  let x = c10["Xỉu"] || 0;
+  lastPrediction = null;
+
+  if (last3.length === 3 && last3[0] === last3[1] && last3[1] === last3[2]) {
+    strategyOutput += `📘 Cầu 3 ván giống nhau ➡️ ${last3[2]}\n`;
+    lastPrediction = last3[2];
+  } else if (last3.length >= 2 && last3[1] === last3[2]) {
+    strategyOutput += `📙 Cầu 2 ván giống nhau ➡️ ${last3[2]}\n`;
+    lastPrediction = last3[2];
   }
-  const bet = parseFloat(document.getElementById("betInput").value || 0);
-  if (!capital || !bet) {
-    alert("⚠️ Vui lòng nhập vốn và tiền cược.");
-    return;
+
+  if (last10.length === 10) {
+    if (t >= 7) {
+      strategyOutput += `📕 Tài quá nhiều (${t}/10) ➡️ Xỉu\n`;
+      lastPrediction = "Xỉu";
+    } else if (x >= 7) {
+      strategyOutput += `📕 Xỉu quá nhiều (${x}/10) ➡️ Tài\n`;
+      lastPrediction = "Tài";
+    }
   }
 
-  if (prediction && count < 15) {
-    profit += (prediction === res) ? bet : -bet;
-    count++;
-    prediction = null;
+  // Cập nhật chiến lược + dự đoán cuối cùng
+  document.getElementById("strategyDisplay").textContent =
+    (strategyOutput || "Chưa có chiến lược phù hợp.") +
+    (lastPrediction ? `\n➡️ Dự đoán cuối cùng: ${lastPrediction}` : "");
+
+  // Vốn
+  document.getElementById("capitalDisplay").textContent = capital ? capital.toLocaleString() + " VND" : "Chưa nhập";
+
+  // Lãi/lỗ
+  document.getElementById("profitDisplay").textContent = profit.toLocaleString() + " VND";
+
+  // Thông tin phiên
+  document.getElementById("sessionInfoDisplay").textContent =
+    `${betHistory.length}/${betLimit} lần cược\n` +
+    (profit >= capital * 0.2 ? "✅ Đạt +20%" :
+     profit <= capital * -0.1 ? "❌ Lỗ -10%" : "Đang chơi...");
+}
+
+function addResult(result) {
+  if (capital === 0) {
+    capital = parseInt(document.getElementById("initialCapital").value);
+    if (!capital || capital <= 0) {
+      alert("Vui lòng nhập vốn hợp lệ.");
+      return;
+    }
   }
 
-  history.push(res);
+  if (currentBet && betHistory.length < betLimit) {
+    let betAmount = parseInt(document.getElementById("betAmount").value) || 100000;
+    let win = result === currentBet;
+    profit += win ? betAmount : -betAmount;
+    betHistory.push({ bet: currentBet, actual: result, result: win ? "✅ Thắng" : "❌ Thua" });
+    alert(`${win ? "✅ Thắng" : "❌ Thua"} - Đoán: ${currentBet}, KQ: ${result}`);
+    currentBet = null;
+  }
+
+  history.push(result);
   updateDisplay();
 }
 
-function predict() {
-  if (history.length < 2) {
-    document.getElementById("output").innerText = "⛔ Chưa đủ dữ liệu.";
-    return;
-  }
-
-  const last2 = history.slice(-2);
-  const last10 = history.slice(-10);
-  const countT = last10.filter(x => x === "Tài").length;
-  const countX = last10.filter(x => x === "Xỉu").length;
-
-  let rule1 = false, rule2 = false;
-  if (last2[0] === last2[1]) {
-    rule1 = true;
-    prediction = last2[1];
-  }
-
-  if (countT >= 7) {
-    rule2 = true;
-    prediction = "Xỉu";
-  } else if (countX >= 7) {
-    rule2 = true;
-    prediction = "Tài";
-  }
-
-  let msg = prediction ? `➡️ Dự đoán: ${prediction}
-` : "❌ Không đủ điều kiện.";
-  if (rule1) msg += "✔ Cầu gần nhất giống nhau
-";
-  if (rule2) msg += `✔ Lệch xác suất (Tài: ${countT}, Xỉu: ${countX})`;
-  document.getElementById("output").innerText = msg;
+function placeBet() {
+  if (!lastPrediction) return alert("Chưa có dự đoán hợp lệ.");
+  if (currentBet) return alert("Đã cược, nhập kết quả tiếp theo.");
+  currentBet = lastPrediction;
+  alert("🎯 Đã cược theo: " + currentBet);
 }
 
-function updateDisplay() {
-  const percent = capital > 0 ? (profit / capital * 100).toFixed(2) : 0;
-  let msg = `📜 Lịch sử (${history.length}): ${history.join(", ")}
-💵 Lợi nhuận: ${profit.toLocaleString()} VND
-🎯 Cược: ${count}/15`;
-
-  if (percent >= 20) msg += "
-✅ Lời +20% → Dừng phiên";
-  if (percent <= -10) msg += "
-❌ Lỗ -10% → Dừng phiên";
-  if (count >= 15) msg += "
-⛔ Đã cược đủ 15 lần";
-
-  document.getElementById("summary").innerText = msg;
-
-  if ((percent >= 20 || percent <= -10 || count >= 15) && history.length > 0) {
-    saveSession();
+function deleteLast() {
+  if (history.length === 0) return alert("Không có gì để xóa.");
+  history.pop();
+  if (betHistory.length > 0) {
+    let b = betHistory.pop();
+    let betAmount = parseInt(document.getElementById("betAmount").value) || 100000;
+    profit -= b.result === "✅ Thắng" ? betAmount : -betAmount;
   }
+  updateDisplay();
 }
 
 function resetSession() {
-  capital = 0;
-  prediction = null;
-  profit = 0;
-  count = 0;
+  if (!confirm("Reset toàn bộ phiên?")) return;
   history = [];
-  document.getElementById("capitalInput").value = "";
-  document.getElementById("betInput").value = "";
+  betHistory = [];
+  capital = 0;
+  profit = 0;
+  currentBet = null;
+  lastPrediction = null;
+  document.getElementById("initialCapital").value = "";
   document.getElementById("sessionName").value = "";
-  document.getElementById("output").innerText = "";
+  document.getElementById("betAmount").value = "";
   updateDisplay();
 }
 
+function editResult() {
+  alert("✏️ Tính năng Edit đang được phát triển.");
+}
+
 function saveSession() {
-  const name = document.getElementById("sessionName").value || `Phiên ${allSessions.length + 1}`;
-  const session = {
-    Phiên: name,
-    Ngày: new Date().toLocaleString(),
-    Vốn: capital,
-    Cược: parseFloat(document.getElementById("betInput").value),
-    Lợi_nhuận: profit,
-    Lượt: count,
-    Lịch_sử: history.join(", ")
-  };
-  allSessions.push(session);
-  showHistory();
-  resetSession();
+  alert("💾 Tính năng Save sẽ bổ sung sau.");
 }
 
-function showHistory() {
-  let out = `🗂 Lịch sử các phiên:
-`;
-  allSessions.forEach((s, i) => {
-    out += `#${i + 1} - ${s.Phiên}: ${s.Lợi_nhuận.toLocaleString()} VND (${s.Lượt} ván)
-`;
-  });
-  document.getElementById("history").innerText = out;
-}
-
-function exportExcel() {
-  if (allSessions.length === 0) {
-    alert("Chưa có phiên nào.");
-    return;
-  }
-  const ws = XLSX.utils.json_to_sheet(allSessions);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "LichSu");
-  XLSX.writeFile(wb, "LichSu_TaiXiu.xlsx");
+function loadSession() {
+  alert("📂 Tính năng Load sẽ bổ sung sau.");
 }

@@ -1,0 +1,86 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f7f7f7;
+  }
+  
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    background: white;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  }
+  
+  .toolbar-left {
+    justify-content: flex-start;
+  }
+  
+  .btn {
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  
+  .tai { background-color: #2196f3; }
+  .xiu { background-color: #f44336; }
+  .gray { background-color: #607d8b; }
+  .bet { background-color: #4caf50; }
+  
+  .main-layout {
+    display: flex;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+  
+  .left-panel {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .input-row input,
+  .input-row .btn.bet {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    flex: 1;
+    min-width: 150px;
+  }
+  
+  .info-box {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .input-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  
